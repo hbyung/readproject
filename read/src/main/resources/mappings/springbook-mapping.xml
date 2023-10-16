@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="BookDAO">
+
+	<insert id="insertBook">
+	<![CDATA[
+		insert into book(isbn, title, author, genre, publisher, image, bcount, summary) 
+		values(LPAD(TRUNC(DBMS_RANDOM.VALUE(1, 9999999999)), 10, '0'),#{title},#{author},#{genre},#{publisher},#{image},#{bcount},#{summary})
+	]]>
+	</insert>
+
+	<select id="getBookList" resultType="book">
+	select * from (select rownum rnum, isbn, title, author, genre, publisher, image, bcount, summary, hit, bdate from (select * from book order by title))
+		where rnum between #{rowStart} and #{rowEnd}
+		<if test="searchCondition == 'TITLE' ">
+			and title like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'AUTHOR' ">
+			and author like '%'||#{searchKeyword}||'%'
+		</if>
+		order by title
+	</select>
+	
+		<select id="listCount" resultType="int">
+		select count(*) from book
+	</select>
+	
+	<select id="getBook" resultType="book">
+	<![CDATA[
+		select * from book where isbn=#{isbn}
+	]]>
+	</select>
+	
+	
+	<select id="getAllBook" resultType="book">
+	<![CDATA[
+		select * from book 
+	]]>
+	</select>
+	
+	
+	<update id="updateBook">
+	<![CDATA[
+		update book set title=#{title}, author=#{author},genre=#{genre}, publisher=#{publisher},
+		image=#{image}, bcount=#{bcount}, summary=#{summary} where isbn=#{isbn}
+	]]>
+	</update>
+	
+	<delete id="deleteBook">
+	<![CDATA[
+		delete from book where isbn=#{isbn}
+	]]>
+	</delete>
+	
+	<update id="updateBookCount">
+	<![CDATA[
+		update book set bcount = bcount + 1 where isbn=#{isbn}
+	]]>
+	</update>
+	
+	<update id="minusBookCount">
+	<![CDATA[
+		update book set bcount = bcount -1 where isbn=#{isbn}
+	]]>
+	</update>
+	
+		<select id="getRecommend" resultType="book">
+		<![CDATA[
+		select * from (select * from book where genre = #{genre} order by dbms_random.value) where rownum <=3
+		]]>
+	</select>
+	
+	
+</mapper>
+
+
+
+
+
+
+

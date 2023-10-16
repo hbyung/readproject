@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  	
+  	<mapper namespace="CumuDAO">
+
+
+	<insert id="insertCumuBoard">
+	<![CDATA[
+		insert into cumuboard(cuseq, cutitle, cuwriter, cucontent) 
+		values((select nvl(max(cuseq), 0)+1 from cumuboard),#{cutitle},#{cuwriter},#{cucontent})
+	]]>
+	</insert>
+
+	<select id="getCumuBoard" resultType="cumu">
+		SELECT  cuseq, 
+		        cutitle, 
+		        CUCONTENT,
+		        CUWRITER, 
+		        CUREGDATE,
+		        cucnt
+		 FROM ( 
+		        SELECT cuseq, 
+		               cutitle, 
+		               CUCONTENT, 
+		               CUWRITER, 
+		               CUREGDATE, 
+		               cucnt,
+		               ROW_NUMBER() OVER(ORDER BY cuseq DESC) AS RNUM
+		         FROM cumuboard
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+		<if test="searchCondition == 'CUTITLE' ">
+		AND cutitle like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'CUCONTENT' ">
+		 and cucontent like '%'||#{searchKeyword}||'%'
+		</if>
+		ORDER BY cuseq DESC
+		
+	</select>
+	
+		<select id="cumulistCount" resultType="int">
+	<![CDATA[
+		SELECT COUNT(cuseq)
+		  FROM cumuboard
+		 WHERE cuseq > 0
+	]]>
+	</select>
+	
+	  <select id="countboardtList" parameterType="String" resultType="int">
+		select count(*) from cumuboard
+	</select>
+	
+	<select id="setcnt" resultType="cumu">
+		update cumuboard set cucnt = cucnt + 1 where cuseq = #{cuseq}
+	</select>	
+	<select id="getBoard" resultType="cumu">
+	<![CDATA[
+		select * from cumuboard where cuseq=#{cuseq}
+	]]>
+	</select>
+	
+	<update id="updateBoard">
+	<![CDATA[
+		update cumuboard set cutitle=#{cutitle}, cucontent=#{cucontent} where cuseq=#{cuseq}
+	]]>
+	</update>
+	
+	<delete id="deleteBoard">
+	<![CDATA[
+		delete from cumuboard where cuseq=#{cuseq}
+	]]>
+	</delete>	
+				
+	<select id="getcureply" resultType="cumu">
+	select * from cureply where cuseq=#{cuseq}
+	</select>		
+	
+		<select id="getcureplyList" resultType="cumu">
+		SELECT  cuseqs, 
+				cuseq,
+		        id, 
+		        password,
+		        cucontents, 
+		        CUREGDATE,
+		        cucnt
+		 FROM ( 
+		        SELECT cuseqs, 
+		        	   cuseq,
+				        id, 
+				        password,
+				        cucontents, 
+				        CUREGDATE,
+				        cucnt,
+		               ROW_NUMBER() OVER(ORDER BY cuseqs DESC) AS RNUM
+		         FROM cureply
+		         where cuseq=#{cuseq}
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+		ORDER BY cuseqs DESC
+		
+	</select>	
+	
+	<select id="getcureplyto" resultType="cumu">
+	select * from cureply where cuseqs=#{cuseqs}
+	</select>
+		
+	
+
+</mapper>  	

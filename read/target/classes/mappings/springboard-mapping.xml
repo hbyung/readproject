@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="BoardDAO">
+
+	<insert id="insertBoard">
+	<![CDATA[
+		insert into springboard(auseq, autitle, auwriter, aucontent) 
+		values((select nvl(max(auseq), 0)+1 from springboard),#{autitle},#{auwriter},#{aucontent})
+	]]>
+	</insert>
+
+<!--  	
+	<select id="getBoardList_T" resultType="board">
+	<![CDATA[
+		select * from springboard where title like '%'||#{searchKeyword}||'%'
+		order by seq desc
+	]]>
+	</select>
+	
+	<select id="getBoardList_C" resultType="board">
+	<![CDATA[
+		select * from springboard where content like '%'||#{searchKeyword}||'%'
+		order by seq desc
+	]]>
+	</select>
+-->
+	
+		<select id="getBoardList" resultType="board">
+		SELECT  auseq, 
+		        AUTITLE, 
+		        AUCONTENT,
+		        AUWRITER, 
+		        AUREGDATE,
+		        aucnt
+		 FROM ( 
+		        SELECT auseq, 
+		               AUTITLE, 
+		               AUCONTENT, 
+		               AUWRITER, 
+		               AUREGDATE, 
+		               aucnt,
+		               ROW_NUMBER() OVER(ORDER BY auseq DESC) AS RNUM
+		         FROM springboard
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+		<if test="searchCondition == 'AUCONTENT' ">
+		AND  AUCONTENT like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'AUTITLE' ">
+		 and AUTITLE like '%'||#{searchKeyword}||'%'
+		</if>
+		ORDER BY auseq DESC
+		
+	</select>
+	
+		<select id="listCount" resultType="int">
+	<![CDATA[
+		SELECT COUNT(AUseq)
+		  FROM springboard
+		 WHERE AUseq > 0
+	]]>
+	</select>
+	
+	  <select id="countboardtList" parameterType="String" resultType="int">
+		select count(*) from springboard
+	</select>
+	
+	<select id="setcnt" resultType="board">
+		update springboard set AUcnt = AUcnt + 1 where AUseq = #{AUseq}
+				
+		
+	</select>
+	
+	<select id="getBoard" resultType="board">
+	<![CDATA[
+		select * from springboard where AUseq=#{AUseq}
+	]]>
+	</select>
+	
+	<update id="updateBoard">
+	<![CDATA[
+		update springboard set autitle=#{autitle}, aucontent=#{aucontent} where auseq=#{auseq}
+	]]>
+	</update>
+	
+	<delete id="deleteBoard">
+	<![CDATA[
+		delete from springboard where AUseq=#{AUseq}
+	]]>
+	</delete>
+
+</mapper>
+
+
+
+
+
+
+

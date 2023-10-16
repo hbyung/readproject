@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="memberDAO">
+
+	<insert id="insertmember">
+	<![CDATA[
+		insert into member(id, password, name, email) 
+		values(#{id}, #{password}, #{name}, #{email})
+	]]>
+	</insert>
+
+	<select id="getmember" resultType="member">
+	<![CDATA[
+		select * from member 
+		where id = #{id} 
+	]]>
+	</select>
+	
+<select id="allmember" resultType="member">
+	<![CDATA[
+	select * from (select id,password,name,email,rank,rank1,rank2,blackrank,
+	 ROW_NUMBER() OVER(ORDER BY name) AS RNUM
+		         FROM member
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+	]]>
+	<if test="searchCondition == 'ID' ">
+		AND ID like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'NAME' ">
+		 and NAME like '%'||#{searchKeyword}||'%'
+		</if>
+	order by name
+</select>
+	
+	<update id="updatemember">
+	<![CDATA[
+		update member set password=#{password} where id=#{id}
+	]]>
+	</update>
+	
+	<update id="rankupdate">
+	<![CDATA[
+		update member set rank=#{rank} where id=#{id}
+	]]>
+	</update>
+	
+		<update id="twrankupdate">
+	<![CDATA[
+		update member set rank1=#{rank1} where id=#{id}
+	]]>
+	</update>
+	
+		<update id="thrankupdate">
+	<![CDATA[
+		update member set rank2=#{rank2} where id=#{id}
+	]]>
+	</update>
+	
+	
+	<delete id="deletemember">
+	<![CDATA[
+		delete from member where id=#{id}
+	]]>
+	</delete>
+	
+		<select id="getMemberCount" resultType="int">
+	<![CDATA[
+		select count(*) from member
+	]]>
+	</select>
+	
+	<update id="updateAdminmember">
+	<![CDATA[
+		update member set email=#{email}, name=#{name} where id=#{id}
+	]]>
+	</update>
+	
+	<update id="addBlackList">
+	<![CDATA[
+		update member set blackrank = -1 where id = #{id} and email = #{email}
+	]]>
+	</update>
+	
+	<select id="checkAlreadyBlackList" resultType="member">
+	<![CDATA[
+		select * from member where id = #{id} and blackrank = -1
+	]]>
+	</select>
+	
+	<select id="getBlackList" resultType="rental">
+	<![CDATA[
+		select id, email from member where blackrank = -1
+	]]>
+	</select>
+
+	<update id="deleteBlackList">
+	<![CDATA[
+		update member set blackrank = 0 where id = #{id} and email = #{email}
+	]]>
+	</update>
+	
+
+	
+
+</mapper>

@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  	
+<mapper namespace="FreeDAO">
+
+
+	<insert id="insertfreeBoard">
+	<![CDATA[
+		insert into freeboard(seq, ttl, writer, content) 
+		values((select nvl(max(seq), 0)+1 from freeboard),#{ttl},#{writer},#{content})
+	]]>
+	</insert>
+
+	<select id="getfreeboard" resultType="free">
+		SELECT  seq, 
+		        ttl, 
+		        CONTENT,
+		        WRITER, 
+		        REGDATE,
+		        cnt
+		 FROM ( 
+		        SELECT seq, 
+		               ttl, 
+		               CONTENT, 
+		               WRITER, 
+		               REGDATE, 
+		               cnt,
+		               ROW_NUMBER() OVER(ORDER BY seq DESC) AS RNUM
+		         FROM freeboard
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+		<if test="searchCondition == 'TTL' ">
+		AND TTL like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'CONTENT' ">
+		 and content like '%'||#{searchKeyword}||'%'
+		</if>
+		ORDER BY seq DESC
+		
+	</select>
+	
+		<select id="getcumuboard" resultType="free">
+		SELECT  cuseq, 
+		        cutitle, 
+		        cucontent,
+		        CUWRITER, 
+		        CUREGDATE,
+		        cucnt
+		 FROM ( 
+		        SELECT cuseq, 
+				       cutitle, 
+				       cucontent,
+				       CUWRITER, 
+				       CUREGDATE,
+				       cucnt,
+		               ROW_NUMBER() OVER(ORDER BY cuseq DESC) AS RNUM
+		         FROM cumuboard
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+
+		ORDER BY cuseq DESC
+		
+	</select>
+	
+	
+	
+	<select id="getreplyList" resultType="free">
+		SELECT  seqs, 
+				seq,
+		        id, 
+		        password,
+		        contents, 
+		        REGDATE,
+		        cnt
+		 FROM ( 
+		        SELECT seqs, 
+		        	   seq,
+				        id, 
+				        password,
+				        contents, 
+				        REGDATE,
+				        cnt,
+		               ROW_NUMBER() OVER(ORDER BY seqs DESC) AS RNUM
+		         FROM reply
+		         where seq=#{seq}
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+		ORDER BY seqs DESC
+		
+	</select>
+	
+		<select id="getspringList" resultType="free">
+		SELECT  auseq, 
+		        autitle, 
+		        auwriter,
+		        aucontent, 
+		        auregdate,
+		        aucnt
+		 FROM ( 
+		        SELECT auseq, 
+				       autitle, 
+				       auwriter,
+				       aucontent, 
+				       auregdate,
+				       aucnt,
+		               ROW_NUMBER() OVER(ORDER BY auseq DESC) AS RNUM
+		         FROM springboard
+		                       ) MP
+		WHERE RNUM BETWEEN 1 AND 5
+		ORDER BY auseq DESC
+		
+	</select>
+	
+	<select id="searchForBook" resultType="free">
+	select * from (select rownum rnum, isbn, title, author, genre, publisher, image, bcount, summary, hit, bdate from (select * from book order by title desc))
+		where 1=1
+		<if test="searchCondition == 'TITLE' ">
+			and replace(UPPER(title), ' ', '') like '%'||replace(UPPER(#{searchKeyword}), ' ', '')||'%'
+		</if>
+		<if test="searchCondition == 'AUTHOR' ">
+			and replace(UPPER(author), ' ', '') like '%'||replace(UPPER(#{searchKeyword}), ' ', '')||'%'
+		</if>
+		order by title
+	</select>
+	
+	<select id="readBookList" resultType="free">
+	select * from (select rownum rnum, isbn, title, author, genre, publisher, image, bcount, summary, hit, bdate from (select * from book order by title desc))
+		where rnum between #{rowStart} and #{rowEnd}
+		<if test="searchCondition == 'TITLE' ">
+			and title like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'AUTHOR' ">
+			and author like '%'||#{searchKeyword}||'%'
+		</if>
+		order by title
+	</select>
+	
+	<select id="getreply" resultType="free">
+	select * from reply where seq=#{seq}
+	</select>
+	
+		<select id="getreplyto" resultType="free">
+	select * from reply where seqs=#{seqs}
+	</select>
+	
+	<select id="three" resultType="free">
+	<![CDATA[
+	 select * from (select * from FREEBOARD where cnt >= 0 order by dbms_random.value) where rownum <=3
+	]]>
+	</select>
+	
+	<select id="recommand" resultType="free">
+	<![CDATA[
+	 select * from (select * from book order by dbms_random.value) where rownum <=3
+	]]>
+	</select>
+	
+		<select id="freelistCount" resultType="int">
+	<![CDATA[
+		SELECT COUNT(seq)
+		  FROM freeboard
+		 WHERE seq > 0
+	]]>
+	</select>
+	
+	  <select id="countboardtList" parameterType="String" resultType="int">
+		select count(*) from freeboard
+	</select>
+	
+	<select id="setcnt" resultType="free">
+		update freeboard set cnt = cnt + 1 where seq = #{seq}
+	</select>	
+	<select id="getBoard" resultType="free">
+	<![CDATA[
+		select * from freeboard where seq=#{seq}
+	]]>
+	</select>
+	
+	<update id="updateBoard">
+	<![CDATA[
+		update freeboard set ttl=#{ttl}, content=#{content} where seq=#{seq}
+	]]>
+	</update>
+	
+	<delete id="deleteBoard">
+	<![CDATA[
+		delete from freeboard where seq=#{seq}
+	]]>
+	</delete>	
+	
+	<select id="allmember" resultType="free">
+	<![CDATA[
+		select * from member order by id desc
+	]]>
+	</select>	
+	
+	
+				
+		
+	
+
+</mapper>  	

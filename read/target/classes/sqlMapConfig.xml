@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  			"https://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<!-- Alias 설정 -->
+	<typeAliases>
+		<typeAlias alias="board" type="com.springproj.biz.board.repository.SpringBoardVO"/>
+		<typeAlias alias="free" type="com.springproj.free.repository.FreeBoardVO"/>
+		<typeAlias alias="member" type="com.springproj.member.repository.memberVO"/>
+		<typeAlias alias="rental" type="com.springproj.biz.rental.repository.BookRentalVO"/>
+		<typeAlias alias="reply" type="com.springproj.relpy.repository.replyVO"/>
+		<typeAlias alias="book" type="com.springproj.book.repository.BookVO"/>
+		<typeAlias alias="hope" type="com.springproj.hope.repository.hopeVO"/>
+		<typeAlias alias="cumu" type="com.springproj.cumu.repository.CumuboardVO"/>
+		<typeAlias alias="cureply" type="com.springproj.curelpy.repository.cureplyVO"/>
+	</typeAliases>
+  
+	<!-- Sql Maper 설정 -->
+	<mappers>
+		<mapper resource="mappings/springboard-mapping.xml"/>
+		<mapper resource="mappings/freeboard-mapping.xml"/>
+		<mapper resource="mappings/member-mapping.xml"/>
+		<mapper resource="mappings/bookrental-mapping.xml"/>
+		<mapper resource="mappings/reply-mapping.xml"/>
+		<mapper resource="mappings/springbook-mapping.xml"/>
+		<mapper resource="mappings/hope-mapping.xml"/>
+		<mapper resource="mappings/Cuboard-mapping.xml"/>
+		<mapper resource="mappings/cureply-mapping.xml"/>
+	</mappers>
+	
+</configuration>

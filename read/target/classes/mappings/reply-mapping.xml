@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  	
+<mapper namespace="replyDAO">
+
+<insert id="insertreply">
+	<![CDATA[
+		insert into reply(seqs, id, password, contents, seq) 
+		values((select nvl(max(seqs), 0)+1 from reply),#{id},#{password},#{contents},#{seq})
+	]]>
+	</insert>
+	
+<select id="getreply" resultType="free">
+		SELECT  seqs, 
+		        id, 
+		        password,
+		        contents, 
+		        REGDATE,
+		        cnt,
+		        seq
+		 FROM ( 
+		        SELECT  seqs, 
+				        id, 
+				        password,
+				        contents, 
+				        REGDATE,
+				        cnt,
+				        seq,
+		               ROW_NUMBER() OVER(ORDER BY seqs DESC) AS RNUM
+		         FROM reply
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+		ORDER BY seqs DESC
+	</select>
+	
+	<select id="replydetail" resultType="reply">
+	<![CDATA[
+	select * from reply where seqs=#{seqs}
+	]]>
+	</select>
+	
+	
+	<select id="replylistCount" resultType="int">
+	<![CDATA[
+		SELECT COUNT(seqs)
+		  FROM reply
+		 WHERE seqs > 0
+	]]>
+	</select>
+	
+	<select id="setcnt" resultType="reply">
+		update reply set cnt = cnt + 1 where seqs = #{seqs}
+	</select>	
+	
+	<update id="updatereply">
+	<![CDATA[
+		update reply set contents=#{contents}, id=#{id} where seqs=#{seqs}
+	]]>
+	</update>
+	
+	<delete id="deletereply">
+	<![CDATA[
+		delete from reply where seqs=#{seqs}
+	]]>
+	</delete>
+	
+	<delete id="deleteAllReply">
+	<![CDATA[
+		delete from reply where seq=#{seq}
+	]]>
+	</delete>
+
+
+</mapper>  	

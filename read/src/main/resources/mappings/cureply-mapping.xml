@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  	
+<mapper namespace="cureplyDAO">
+
+<insert id="insertcureply">
+	<![CDATA[
+		insert into cureply(cuseqs, id,cucontents, cuseq) 
+		values((select nvl(max(cuseqs), 0)+1 from cureply),#{id},#{cucontents},#{cuseq})
+	]]>
+	</insert>
+	
+<select id="getcureply" resultType="cureply">
+		SELECT  cuseqs, 
+		        id, 
+		        password,
+		        cucontents, 
+		        CUREGDATE,
+		        cucnt,
+		        cuseq
+		 FROM ( 
+		        SELECT  cuseqs, 
+				        id, 
+				        password,
+				        cucontents, 
+				        CUREGDATE,
+				        cucnt,
+				        cuseq,
+		               ROW_NUMBER() OVER(ORDER BY cuseqs DESC) AS RNUM
+		         FROM cureply
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+		ORDER BY cuseqs DESC
+	</select>
+	
+	<select id="cureplylistCount" resultType="int">
+	<![CDATA[
+		SELECT COUNT(cuseqs)
+		  FROM cureply
+		 WHERE cuseqs > 0
+	]]>
+	</select>
+	
+	<select id="setcnt" resultType="cureply">
+		update cureply set cucnt = cucnt + 1 where cuseqs = #{cuseqs}
+	</select>	
+	
+	<update id="updatereply">
+	<![CDATA[
+		update cureply set cucontents=#{cucontents}, id=#{id} where cuseqs=#{cuseqs}
+	]]>
+	</update>
+	
+	<delete id="deletereply">
+	<![CDATA[
+		delete from cureply where cuseqs=#{cuseqs}
+	]]>
+	</delete>		
+	
+		<delete id="deleteAllcuReply">
+	<![CDATA[
+		delete from cureply where cuseq=#{cuseq}
+	]]>
+	</delete>
+
+
+</mapper>  	  	

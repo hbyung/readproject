@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="RentalDAO">
+
+	<insert id="insertRental">
+	<![CDATA[
+		insert into bookRental(risbn, remail, rid, rtitle, rauthor, rrentalDate, rreturnDate) 
+		values(#{risbn},#{remail},#{rid},#{rtitle},#{rauthor},sysdate,sysdate + 7)
+	]]>
+	</insert>
+	
+	<select id="getRentalCount" resultType="int" >
+	<![CDATA[
+		select count(isbn) from bookRental where rid=#{rid}
+	]]>	
+	</select>
+	
+		<select id="getUserRentalCount" resultType="int" >
+	<![CDATA[
+		select count(*) from bookRental where rid=#{rid}
+		
+	]]>
+	
+	</select>
+	
+	<select id="delayedCount" resultType="int" >
+	<![CDATA[
+		select count(*) from bookRental where rsysdate > rreturnDate
+	]]>	
+	</select>
+	
+	<select id="delayedIdList" resultType="rental" >
+	<![CDATA[
+		SELECT DISTINCT rid, remail FROM bookRental WHERE rreturnDate < SYSDATE 
+		GROUP BY rid, remail HAVING COUNT(*) >= 3
+	]]>	
+	</select>
+
+
+	<select id="getRentalList" resultType="rental">
+		
+		<![CDATA[
+			select * from (select rownum rnum, risbn, remail, rid, rtitle, rauthor, rrentalDate, rreturnDate from (select * from bookRental order by rrentalDate desc))
+			where rnum between #{rowStart} and #{rowEnd}
+		]]>
+		<if test="searchCondition == 'TITLE' ">
+			and rtitle like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'ID' ">
+			and rid like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'ISBN' ">
+			and risbn like '%'||#{searchKeyword}||'%'
+		</if>
+		order by rentalDate desc
+		
+	</select>
+	
+	<select id="deleteRentalList" resultType="rental"  >
+		
+		<![CDATA[
+			select * from bookRental where rid = #{rid}
+		]]>
+		<if test="searchCondition == 'TITLE' ">
+			and rtitle like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'ISBN' ">
+			and risbn like '%'||#{searchKeyword}||'%'
+		</if>
+		order by rreturnDate desc
+
+	</select>
+	
+	<select id="getRental" resultType="rental">
+	<![CDATA[
+		select * from bookRental where risbn=#{risbn}
+	]]>
+	</select>
+	
+	<select id="delayedRentalList" resultType="rental">
+	
+		<![CDATA[
+			select * from (select rownum rnum, risbn, remail, rid, rtitle, rauthor, rrentalDate, rreturnDate from (select * from bookRental where sysdate > rreturnDate order by rreturnDate desc))
+			where rnum between #{rowStart} and #{rowEnd}
+		]]>
+		<if test="searchCondition == 'TITLE' ">
+			and rtitle like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'ID' ">
+			and rid like '%'||#{searchKeyword}||'%'
+		</if>
+		<if test="searchCondition == 'ISBN' ">
+			and risbn like '%'||#{searchKeyword}||'%'
+		</if>
+		order by rreturnDate desc
+	
+	</select>
+	
+<select id="checkBook" resultType="book">
+		<![CDATA[
+		SELECT * FROM book
+		WHERE TRIM(title) = TRIM(#{title}) AND TRIM(author) = TRIM(#{author})
+	]]>
+	</select>
+	
+	
+	
+	<update id="updateRental">
+		<![CDATA[
+			update bookRental set rrentalDate = #{rrentalDate}, rreturnDate = #{rrentalDate} + 7 where risbn=#{risbn} and remail=#{remail}
+			
+		]]>
+		
+	</update>
+	
+	<delete id="deleteRental">
+		<![CDATA[
+			delete from bookRental where risbn=#{risbn} and rid=#{rid}
+		]]>
+	</delete>
+	
+	<select id="checkAlreadyRental" resultType="rental">
+		<![CDATA[
+			select * from bookRental where risbn=#{risbn} and rid=#{rid}
+		]]>
+	</select>
+
+	<delete id="deleteAllService">
+		<![CDATA[
+			delete from bookRental where risbn=#{risbn}
+		]]>
+	</delete>
+	
+	
+
+</mapper>
+
+
+
+
+
+
+
+
